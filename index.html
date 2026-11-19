@@ -1,0 +1,475 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL QUEST - Ultimate Database Game</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+ font-family:Arial,sans-serif;
+ background:linear-gradient(135deg,#100e2e,#21104c,#102d50);
+ color:white;min-height:100vh;
+}
+header{
+ display:flex;justify-content:space-between;align-items:center;
+ padding:18px 6%;border-bottom:1px solid #ffffff25;
+}
+.logo{font-size:25px;font-weight:900;color:#c4b5fd}
+.logo span{color:#22d3ee}
+button{cursor:pointer;font-family:inherit}
+.container{max-width:1050px;margin:30px auto;padding:16px}
+.panel{
+ background:#ffffff0d;border:1px solid #ffffff25;
+ border-radius:22px;padding:28px;
+ box-shadow:0 15px 45px #0004;
+}
+.hidden{display:none!important}
+.hero{text-align:center;padding:20px 5px}
+.hero .big{font-size:65px}
+.hero h1{font-size:clamp(38px,8vw,65px);margin:12px}
+.hero h1 span{color:#22d3ee}
+.muted{color:#cbd5e1;line-height:1.7}
+.btn{
+ border:0;border-radius:12px;padding:14px 23px;
+ background:linear-gradient(90deg,#8b5cf6,#06b6d4);
+ color:white;font-weight:bold;font-size:15px;margin:7px;
+}
+.btn:hover{filter:brightness(1.15);transform:translateY(-2px)}
+.secondary{background:#ffffff17;border:1px solid #ffffff35}
+.stats{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ gap:12px;margin:22px 0;
+}
+.stat{
+ background:#ffffff12;border-radius:14px;
+ padding:17px;text-align:center;
+}
+.stat strong{display:block;font-size:25px;color:#67e8f9}
+.stat small{color:#cbd5e1}
+.section-title{margin:22px 0 14px}
+.profile{text-align:center;margin-bottom:20px}
+.avatar{
+ font-size:55px;background:#ffffff12;
+ display:inline-block;border-radius:50%;
+ padding:12px;margin:12px;
+}
+input{
+ padding:13px;border-radius:10px;border:1px solid #ffffff35;
+ background:#ffffff12;color:white;font-size:16px;
+ width:100%;max-width:350px;
+}
+input::placeholder{color:#cbd5e1}
+.avatar-list{
+ display:flex;justify-content:center;flex-wrap:wrap;gap:10px;
+ margin:15px;
+}
+.avatar-btn{
+ font-size:29px;padding:10px;border-radius:12px;
+ border:2px solid transparent;background:#ffffff12;color:white;
+}
+.avatar-btn.selected{border-color:#22d3ee;background:#ffffff25}
+.levels{
+ display:grid;grid-template-columns:repeat(2,1fr);gap:14px;
+ margin-top:20px;
+}
+.level{
+ background:#ffffff10;border:1px solid #ffffff25;
+ padding:20px;border-radius:16px;cursor:pointer;
+}
+.level:hover{background:#8b5cf644;transform:translateY(-3px)}
+.level .emoji{font-size:30px}
+.level h3{margin:9px 0;color:#a5f3fc}
+.level p{color:#cbd5e1;font-size:13px;line-height:1.5}
+.topbar{
+ display:flex;justify-content:space-between;
+ flex-wrap:wrap;gap:10px;margin-bottom:20px;
+}
+.pill{padding:10px 14px;border-radius:10px;background:#ffffff15}
+.progress{height:9px;background:#ffffff20;border-radius:20px;margin:15px 0 25px;overflow:hidden}
+.progress div{height:100%;background:linear-gradient(90deg,#a78bfa,#22d3ee);width:0;transition:.3s}
+.question{font-size:23px;line-height:1.5;margin:20px 0}
+.options{display:grid;gap:12px}
+.option{
+ padding:16px;text-align:left;border-radius:12px;
+ border:1px solid #ffffff30;background:#ffffff12;
+ color:white;font-size:15px;
+}
+.option:hover:not(:disabled){background:#8b5cf655}
+.option.correct{background:#166534;border-color:#4ade80}
+.option.wrong{background:#991b1b;border-color:#f87171}
+.option:disabled{cursor:default}
+.feedback{
+ background:#ffffff12;padding:15px;border-radius:12px;
+ margin-top:17px;line-height:1.6;
+}
+.center{text-align:center}
+footer{text-align:center;padding:25px;color:#94a3b8;font-size:12px}
+.badge{
+ display:inline-block;background:#ffffff15;
+ padding:7px 12px;border-radius:20px;margin:5px;
+}
+@media(max-width:600px){
+ header{padding:15px}
+ .container{padding:10px;margin:15px auto}
+ .panel{padding:19px 14px}
+ .levels{grid-template-columns:1fr}
+ .stats{gap:7px}
+ .stat{padding:12px 5px}
+ .stat strong{font-size:20px}
+ .question{font-size:19px}
+ .btn{width:100%;margin:7px 0}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">SQL <span>QUEST</span></div>
+ <div>🎮 DATABASE CHALLENGE</div>
+</header>
+
+<main class="container">
+
+<!-- HOME -->
+<section id="home" class="panel">
+ <div class="profile">
+  <div class="hero">
+   <div class="big">🧠</div>
+   <h1>SQL <span>QUEST</span></h1>
+   <p class="muted">Think Smart. Play Smart. Become a Champion!</p>
+  </div>
+
+  <h2>👋 Player Profile</h2>
+  <div class="avatar" id="avatarDisplay">🧑‍💻</div>
+  <br>
+  <input id="playerName" maxlength="20" placeholder="Enter your player name">
+  <div class="avatar-list" id="avatarList"></div>
+  <button class="btn" onclick="saveProfile()">SAVE PROFILE</button>
+  <p id="welcomeText" style="color:#67e8f9;margin:10px"></p>
+ </div>
+
+ <div class="stats">
+  <div class="stat"><strong id="bestScore">0</strong><small>Best Score</small></div>
+  <div class="stat"><strong id="coins">0</strong><small>🪙 Coins</small></div>
+  <div class="stat"><strong>7</strong><small>Levels</small></div>
+ </div>
+
+ <div class="center">
+  <button class="btn" onclick="showLevels()">🚀 PLAY GAME</button>
+  <button class="btn secondary" onclick="showLeaderboard()">🏆 Leaderboard</button>
+  <button class="btn secondary" onclick="toggleSound()" id="soundButton">🔊 Sound ON</button>
+ </div>
+
+ <h2 class="section-title">✨ About The Game</h2>
+ <p class="muted">
+  Test your RDBMS knowledge with exciting quizzes.
+  Complete levels, collect coins, improve your skills
+  and become the ultimate Database Champion!
+ </p>
+</section>
+
+<!-- LEVELS -->
+<section id="levelPage" class="panel hidden">
+ <h2>🌟 Choose Your Challenge</h2>
+ <p class="muted">Complete questions and earn rewards!</p>
+ <div class="levels" id="levelList"></div>
+ <div class="center"><button class="btn secondary" onclick="goHome()">⬅ Home</button></div>
+</section>
+
+<!-- GAME -->
+<section id="gamePage" class="panel hidden">
+ <div class="topbar">
+  <div class="pill" id="levelName">Level 1</div>
+  <div class="pill">⭐ <span id="score">0</span></div>
+  <div class="pill">🪙 <span id="gameCoins">0</span></div>
+  <div class="pill">⏱ <span id="timer">20</span>s</div>
+ </div>
+
+ <div class="progress"><div id="progressBar"></div></div>
+ <p id="questionNumber" style="color:#67e8f9"></p>
+ <h2 class="question" id="question"></h2>
+ <div class="options" id="options"></div>
+ <div id="feedback" class="feedback hidden"></div>
+
+ <div class="center">
+  <button class="btn secondary" onclick="goHome()">🏠 Home</button>
+  <button class="btn hidden" id="nextBtn" onclick="nextQuestion()">Next ➜</button>
+ </div>
+</section>
+
+<!-- RESULTS -->
+<section id="resultPage" class="panel center hidden">
+ <div style="font-size:65px">🏆</div>
+ <h1 id="resultTitle">Challenge Completed!</h1>
+ <p class="muted" id="resultPlayer"></p>
+
+ <div class="stats">
+  <div class="stat"><strong id="finalScore">0</strong><small>Score</small></div>
+  <div class="stat"><strong id="correctCount">0</strong><small>Correct</small></div>
+  <div class="stat"><strong id="earnedCoins">0</strong><small>Coins earned</small></div>
+ </div>
+ <h2 id="resultMessage"></h2>
+ <button class="btn" onclick="retryLevel()">🔄 Play Again</button>
+ <button class="btn" onclick="showLevels()">Next Level ➜</button>
+ <button class="btn secondary" onclick="goHome()">🏠 Home</button>
+</section>
+
+<!-- LEADERBOARD -->
+<section id="leaderPage" class="panel">
+ <h2>🏆 Hall of Champions</h2>
+ <p class="muted">Best scores saved on this device.</p>
+ <div id="leaderList" style="margin-top:20px"></div>
+ <div class="center"><button class="btn secondary" onclick="goHome()">⬅ Home</button></div>
+</section>
+
+</main>
+
+<footer>SQL QUEST © 2026 | LEARN • PLAY • ACHIEVE</footer>
+
+<script>
+const levels=[
+ {name:"Database Basics",icon:"🗄️",desc:"Database and DBMS concepts"},
+ {name:"SQL Commands",icon:"💻",desc:"DDL, DML, DQL, DCL and TCL"},
+ {name:"Operators & Functions",icon:"⚡",desc:"SQL operators and functions"},
+ {name:"Joins & Subqueries",icon:"🔗",desc:"Join tables and subqueries"},
+ {name:"Normalization",icon:"📊",desc:"1NF, 2NF and 3NF"},
+ {name:"Constraints & Objects",icon:"🔐",desc:"Keys, views and indexes"},
+ {name:"PL/SQL Basics",icon:"🚀",desc:"PL/SQL programming basics"}
+];
+
+const questions=[
+[
+ ["What is a database?",["Collection of related data","A computer game","A web browser","Only images"],0,"A database is an organized collection of related data."],
+ ["What is the full form of DBMS?",["Data Basic Management System","Database Management System","Digital Base Machine System","Database Main Software"],1,"DBMS means Database Management System."],
+ ["Which is a database element?",["Field","Record","File","All of these"],3,"Fields, records and files are database elements."],
+ ["What is metadata?",["Data about data","Deleted data","Only numbers","A query"],0,"Metadata describes other data."],
+ ["Which software manages a database?",["DBMS","Paint","Calculator","Browser"],0,"DBMS manages and organizes databases."]
+],
+[
+ ["Which command creates a table?",["INSERT","CREATE TABLE","UPDATE","SELECT"],1,"CREATE TABLE is a DDL command."],
+ ["Which command removes all rows but keeps table structure?",["DROP","DELETE DATABASE","TRUNCATE","RENAME"],2,"TRUNCATE removes all rows from a table."],
+ ["Which command adds records?",["INSERT","ALTER","DROP","GRANT"],0,"INSERT adds new records."],
+ ["Which command retrieves data?",["UPDATE","SELECT","DELETE","CREATE"],1,"SELECT retrieves data."],
+ ["Which command gives privileges?",["REVOKE","COMMIT","GRANT","ROLLBACK"],2,"GRANT gives privileges to users."]
+],
+[
+ ["Which operator checks a range?",["LIKE","BETWEEN","EXISTS","INSTR"],1,"BETWEEN checks a range of values."],
+ ["Which function returns the largest value?",["MIN","COUNT","MAX","AVG"],2,"MAX returns the maximum value."],
+ ["Which function converts text to uppercase?",["LOWER","UPPER","INITCAP","SUBSTR"],1,"UPPER converts text to uppercase."],
+ ["Which function counts rows?",["SUM","AVG","COUNT","ROUND"],2,"COUNT returns the number of rows or non-NULL values."],
+ ["Which clause groups rows?",["ORDER BY","GROUP BY","WHERE","SELECT"],1,"GROUP BY groups rows."]
+],
+[
+ ["Which JOIN returns matching rows?",["INNER JOIN","LEFT JOIN","FULL JOIN","CROSS JOIN"],0,"INNER JOIN returns matching rows from both tables."],
+ ["Which JOIN returns all left table rows?",["RIGHT JOIN","LEFT JOIN","INNER JOIN","CROSS JOIN"],1,"LEFT JOIN keeps all rows from the left table."],
+ ["What is a subquery?",["A table name","A query inside another query","A data type","A database file"],1,"A subquery is nested inside another query."],
+ ["Which operator combines results and removes duplicates?",["UNION","UNION ALL","MINUS","INTERSECT"],0,"UNION combines results and removes duplicates."]
+],
+[
+ ["What is normalization?",["Deleting data","Organizing data to reduce redundancy","Creating users","Sorting data"],1,"Normalization reduces unnecessary data redundancy."],
+ ["Which normal form requires atomic values?",["1NF","2NF","3NF","None"],0,"1NF requires atomic values."],
+ ["Which normal form removes partial dependency?",["1NF","2NF","3NF","None"],1,"2NF removes partial dependency."],
+ ["Which normal form removes transitive dependency?",["1NF","2NF","3NF","None"],2,"3NF removes transitive dependency."]
+],
+[
+ ["Which constraint prevents NULL values?",["UNIQUE","CHECK","NOT NULL","FOREIGN KEY"],2,"NOT NULL prevents NULL values."],
+ ["Which key uniquely identifies a record?",["Foreign Key","Primary Key","Duplicate Key","Normal Key"],1,"Primary Key uniquely identifies each record."],
+ ["Which object is a virtual table?",["View","Sequence","Index","Synonym"],0,"A VIEW is based on a SQL query."],
+ ["Which command creates an index?",["CREATE VIEW","CREATE INDEX","CREATE USER","CREATE KEY"],1,"CREATE INDEX creates an index."]
+],
+[
+ ["What is PL/SQL?",["Procedural extension of SQL","A browser","A database table","A network protocol"],0,"PL/SQL is Oracle's procedural extension to SQL."],
+ ["Which symbol is used with %TYPE?",["&","%","@","#"],1,"%TYPE refers to a variable or column data type."],
+ ["What does %ROWTYPE represent?",["A character","A complete row record structure","A user","An operator"],1,"%ROWTYPE declares a record matching a table or cursor row."],
+ ["Which keyword starts a PL/SQL block?",["BEGIN","START","OPEN","RUN"],0,"BEGIN starts the executable section of a PL/SQL block."]
+]
+];
+
+let currentLevel=0,questionIndex=0,score=0,correct=0;
+let time=20,timerInterval=null,answered=false,soundOn=true;
+let earned=0,selectedAvatar="🧑‍💻";
+
+const $=id=>document.getElementById(id);
+const get=(key,def)=>JSON.parse(localStorage.getItem(key)??JSON.stringify(def));
+const set=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
+
+function hideAll(){
+ ["home","levelPage","gamePage","resultPage","leaderPage"]
+ .forEach(id=>$(id).classList.add("hidden"));
+}
+function goHome(){
+ clearInterval(timerInterval);
+ hideAll();$("home").classList.remove("hidden");
+ updateHome();
+}
+function updateHome(){
+ $("bestScore").textContent=localStorage.getItem("sqlBest")||0;
+ $("coins").textContent=localStorage.getItem("sqlCoins")||0;
+ $("playerName").value=localStorage.getItem("sqlPlayer")||"";
+ selectedAvatar=localStorage.getItem("sqlAvatar")||"🧑‍💻";
+ $("avatarDisplay").textContent=selectedAvatar;
+ $("welcomeText").textContent=localStorage.getItem("sqlPlayer")
+ ?"Welcome back, "+localStorage.getItem("sqlPlayer")+"! 🎮":"Create your player profile!";
+ renderAvatars();
+}
+function renderAvatars(){
+ const avatars=["🧑‍💻","👩‍💻","👨‍💻","🧑‍🚀","🦸‍♀️","🤖","🧙‍♂️","🥷"];
+ $("avatarList").innerHTML="";
+ avatars.forEach(a=>{
+  const b=document.createElement("button");
+  b.className="avatar-btn"+(a===selectedAvatar?" selected":"");
+  b.textContent=a;
+  b.onclick=()=>{
+   selectedAvatar=a;
+   localStorage.setItem("sqlAvatar",a);
+   $("avatarDisplay").textContent=a;
+   renderAvatars();
+  };
+  $("avatarList").appendChild(b);
+ });
+}
+function saveProfile(){
+ const name=$("playerName").value.trim();
+ if(!name){alert("Please enter your name!");return}
+ localStorage.setItem("sqlPlayer",name);
+ localStorage.setItem("sqlAvatar",selectedAvatar);
+ $("welcomeText").textContent="Welcome to SQL QUEST, "+name+"! 🎉";
+}
+function showLevels(){
+ hideAll();$("levelPage").classList.remove("hidden");
+ $("levelList").innerHTML="";
+ levels.forEach((l,i)=>{
+  const div=document.createElement("div");
+  div.className="level";
+  div.innerHTML=`<div class="emoji">${l.icon}</div><h3>Level ${i+1}: ${l.name}</h3><p>${l.desc}</p><br><b>▶ Play Now</b>`;
+  div.onclick=()=>startLevel(i);
+  $("levelList").appendChild(div);
+ });
+}
+function startLevel(index){
+ if(!localStorage.getItem("sqlPlayer")){
+  alert("Please save your player profile first!");
+  goHome();return;
+ }
+ currentLevel=index;questionIndex=0;score=0;correct=0;earned=0;
+ hideAll();$("gamePage").classList.remove("hidden");
+ loadQuestion();
+}
+function loadQuestion(){
+ clearInterval(timerInterval);
+ answered=false;time=20;
+ const item=questions[currentLevel][questionIndex];
+ $("levelName").textContent="Level "+(currentLevel+1)+" - "+levels[currentLevel].name;
+ $("score").textContent=score;
+ $("gameCoins").textContent=localStorage.getItem("sqlCoins")||0;
+ $("timer").textContent=time;
+ $("questionNumber").textContent="Question "+(questionIndex+1)+" / "+questions[currentLevel].length;
+ $("progressBar").style.width=(questionIndex/questions[currentLevel].length*100)+"%";
+ $("question").textContent=item[0];
+ $("feedback").classList.add("hidden");
+ $("nextBtn").classList.add("hidden");
+ $("options").innerHTML="";
+ item[1].forEach((option,i)=>{
+  const b=document.createElement("button");
+  b.className="option";
+  b.textContent=String.fromCharCode(65+i)+". "+option;
+  b.onclick=()=>checkAnswer(i);
+  $("options").appendChild(b);
+ });
+ timerInterval=setInterval(()=>{
+  time--; $("timer").textContent=time;
+  if(time<=0)checkAnswer(-1);
+ },1000);
+}
+function beep(frequency=600){
+ if(!soundOn)return;
+ try{
+  const ctx=new(window.AudioContext||window.webkitAudioContext)();
+  const osc=ctx.createOscillator(),gain=ctx.createGain();
+  osc.frequency.value=frequency;
+  gain.gain.value=.04;
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.start();osc.stop(ctx.currentTime+.13);
+ }catch(e){}
+}
+function checkAnswer(choice){
+ if(answered)return;
+ answered=true;clearInterval(timerInterval);
+ const item=questions[currentLevel][questionIndex];
+ document.querySelectorAll(".option").forEach((b,i)=>{
+  b.disabled=true;
+  if(i===item[2])b.classList.add("correct");
+  else if(i===choice)b.classList.add("wrong");
+ });
+ if(choice===item[2]){
+  const points=10+(time>10?5:0);
+  score+=points;correct++;earned+=5;
+  beep(850);
+  $("feedback").innerHTML="🎉 <b>Correct Answer! +"+points+" points</b><br>"+item[3];
+ }else{
+  beep(250);
+  $("feedback").innerHTML="💡 <b>"+(choice===-1?"Time is up!":"Try again next time!")+"</b><br>Correct answer: "+item[1][item[2]]+"<br>"+item[3];
+ }
+ $("feedback").classList.remove("hidden");
+ $("score").textContent=score;
+ $("nextBtn").classList.remove("hidden");
+ $("nextBtn").textContent=questionIndex===questions[currentLevel].length-1?"See Results 🏆":"Next Question ➜";
+}
+function nextQuestion(){
+ if(!answered)return;
+ questionIndex++;
+ if(questionIndex<questions[currentLevel].length)loadQuestion();
+ else showResult();
+}
+function showResult(){
+ clearInterval(timerInterval);
+ hideAll();$("resultPage").classList.remove("hidden");
+ const totalCoins=Number(localStorage.getItem("sqlCoins")||0)+earned;
+ localStorage.setItem("sqlCoins",totalCoins);
+ const best=Math.max(Number(localStorage.getItem("sqlBest")||0),score);
+ localStorage.setItem("sqlBest",best);
+ let history=get("sqlHistory",[]);
+ history.push({
+  name:localStorage.getItem("sqlPlayer")||"Player",
+  avatar:localStorage.getItem("sqlAvatar")||"🧑‍💻",
+  level:levels[currentLevel].name,score:score
+ });
+ set("sqlHistory",history.slice(-30));
+ $("resultTitle").textContent=correct===questions[currentLevel].length?"Perfect Champion! 🏆":"Challenge Completed!";
+ $("resultPlayer").textContent="Great work, "+localStorage.getItem("sqlPlayer")+"!";
+ $("finalScore").textContent=score;
+ $("correctCount").textContent=correct+"/"+questions[currentLevel].length;
+ $("earnedCoins").textContent=earned;
+ $("resultMessage").textContent=score>=40?"Amazing! You are a SQL Star! ⭐":"Keep learning and try again! 💪";
+}
+function retryLevel(){startLevel(currentLevel)}
+function showLeaderboard(){
+ clearInterval(timerInterval);
+ hideAll();$("leaderPage").classList.remove("hidden");
+ let history=get("sqlHistory",[]);
+ history.sort((a,b)=>b.score-a.score);
+ $("leaderList").innerHTML=history.length?history.slice(0,10).map((x,i)=>
+ `<div class="level" style="margin-bottom:10px">
+ ${i+1}. ${x.avatar} <b>${escapeHTML(x.name)}</b>
+ <span style="float:right">${x.score} ⭐</span>
+ <p>${escapeHTML(x.level)}</p>
+ </div>`).join(""):"<p class='muted'>No scores yet. Play a game first!</p>";
+}
+function escapeHTML(s){
+ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function toggleSound(){
+ soundOn=!soundOn;
+ $("soundButton").textContent=soundOn?"🔊 Sound ON":"🔇 Sound OFF";
+ if(soundOn)beep();
+}
+$("leaderPage").classList.add("hidden");
+goHome();
+</script>
+</body>
+</html>
+
